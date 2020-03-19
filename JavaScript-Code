@@ -1,0 +1,323 @@
+    
+
+        var ColumnNames = [];
+        var ColumnNamesTranslate = [];
+        var jsondata = [];
+        var results;
+        var obj;
+        ColumnsDataTable = [];
+        filters = [];
+        var OperationTypes = ["مشتريات", "مردود مشتريات", "مبيعات", "مردود مبيعات", "سند قبض", "سند دفع", "مقبوضات نثرية", "مصروفات نثرية",
+                           "رصيد إفتتاحي", "رصيد أول المدة", "راتب شهرى", "خصم", "مكافأة", "عمولة", "إيداع", "سحب", "رصيد إفتتاحي - خزينة", "استقطاع",
+                           "تحويل أصناف", "عرض سعر أصناف", "شيك وارد", "شيك صادر", "إيداع بنكي", "سحب بنكي", "تحويل بنكي"];
+
+        var Bank_Status = ["محصل", "قيد التحصيل", "واجب التحصيل", "مرفوض"];
+
+
+        $(document).ready(function () {
+            
+
+            $.ajax({
+                url: "/api/SalesMonitorApis/@ViewData["api"]/",
+                type: "GET",
+                success: function (data) {
+
+                    jsondata = data;
+
+                    if (data.length == null) {
+                        obj = data;
+                        ColumnNames = Object.keys(data);
+                    }
+
+                    else {
+
+                        obj = data[0];
+                        ColumnNames = Object.keys(data[0]);
+
+                    }
+
+
+                    for (var i = 0; i < ColumnNames.length; i++) {
+
+                        //if (!ColumnNames[i].startsWith("_", 0)) {
+                        //    ColumnsDataTable.push({ 'name': ColumnNames[i], 'data': ColumnNames[i] });
+                        //}
+
+                        if (ColumnNames[i].startsWith("_search", 0)) {
+                            //$("#Results .header").append("<th>" + obj[ColumnNames[i]] + "</th>");
+                            $("#searchTable thead tr").append("<th class = " + ColumnNames[i].replace("_search_", "") + ">" + obj[ColumnNames[i]] + "</th>")
+
+                        }
+
+                    }
+
+
+                    $("#searchTable thead tr:eq(0) th").each(function (index) {
+                        var property = $(this).attr("class");
+
+                        if (property == "Trans_Date") {
+                            $(this).replaceWith('<th class = "' + $(this).attr("class") + '" ><input type="date" placeholder="' + $(this).html() + '"></input></th>');
+
+
+                        }
+
+                        $(this).replaceWith('<th class = "' + $(this).attr("class") + '" ><input type="text" placeholder="' + $(this).html() + '"></input></th>');
+                        //var searchControl = $("#searchTable thead tr:eq(0) th:eq(" + index + ") input");
+                        //searchControl.on('keyup', function () {
+                        //    Reports.column('' + th.eq(index).attr("class") + ':name').search(searchControl.val()).draw();
+                        //});
+                    });
+                }
+
+            });
+
+        });
+
+
+
+
+        $('body').on("keyup", '#searchTable thead tr:eq(0) th input', function (e) {
+
+            $("#browsers option").remove();
+
+            var SearchControl = $(this);
+
+            var TextInput = $(this).val()
+
+            if (TextInput.length >= 3) {
+
+                var property = $(this).parent().attr("class");
+
+                switch (property) {
+
+                    case "Bank_Account_Name":
+                        SearchControl.attr("list", "browsers")
+                        $.ajax({
+                            url: "/api/SearchApis/Search_BankAccountNames/",
+                            type: "GET",
+                            data: { 'condition': TextInput },
+                            success: function (data) {
+                                for (var i = 0; i < data.length; i++) {
+                                    $("#browsers").append("<option>" + data[i] + "</option>");
+                                }
+                            }
+
+                        });
+                        break;
+
+                    case "OperationType":
+                        SearchControl.attr("list", "browsers");
+        
+                        for (var i = 0; i < OperationTypes.length ; i++) {
+
+                            if (OperationTypes[i].search(TextInput) > -1) {
+                                $("#browsers").append("<option>" + OperationTypes[i] + "</option>");
+                            }
+
+                        }
+                      
+                        break;
+
+                    case "Bank_Status":
+                        SearchControl.attr("list", "browsers");
+
+                        for (var i = 0; i < Bank_Status.length ; i++) {
+
+                            if (Bank_Status[i].search(TextInput) > -1) {
+                                $("#browsers").append("<option>" + Bank_Status[i] + "</option>");
+                            }
+
+                        }
+                        break;
+
+                    case "Account_Name":
+                        SearchControl.attr("list", "browsers")
+                        $.ajax({
+                            url: "/api/SearchApis/Search_AccountNames/",
+                            type: "GET",
+                            data: { 'condition': TextInput },
+                            success: function (data) {
+                                for (var i = 0; i < data.length; i++) {
+                                    $("#browsers").append("<option>" + data[i] + "</option>");
+                                }
+                            }
+
+                        });
+                        
+                        break;
+
+                    case "Emp_Name":
+                        SearchControl.attr("list", "browsers")
+                        $.ajax({
+                            url: "/api/SearchApis/Search_EmployeesNames/",
+                            type: "GET",
+                            data: { 'condition': TextInput },
+                            success: function (data) {
+                                for (var i = 0; i < data.length; i++) {
+                                    $("#browsers").append("<option>" + data[i] + "</option>");
+                                }
+                            }
+
+                        });
+
+                        break;
+
+                    case "Brand_Name":
+                        SearchControl.attr("list", "browsers")
+                        $.ajax({
+                            url: "/api/SearchApis/Search_BrandNames/",
+                            type: "GET",
+                            data: { 'condition': TextInput },
+                            success: function (data) {
+                                for (var i = 0; i < data.length; i++) {
+                                    $("#browsers").append("<option>" + data[i] + "</option>");
+                                }
+                            }
+
+                        });
+
+                        break;
+
+                    case "Cat_Name":
+                        SearchControl.attr("list", "browsers")
+                        $.ajax({
+                            url: "/api/SearchApis/Search_BrandCategory/",
+                            type: "GET",
+                            data: { 'condition': TextInput },
+                            success: function (data) {
+                                for (var i = 0; i < data.length; i++) {
+                                    $("#browsers").append("<option>" + data[i] + "</option>");
+                                }
+                            }
+
+                        });
+
+                        break;
+
+                    case "Stake_Name":
+                        SearchControl.attr("list", "browsers")
+                        $.ajax({
+                            url: "/api/SearchApis/Search_StakeName/",
+                            type: "GET",
+                            data: { 'condition': TextInput },
+                            success: function (data) {
+                                for (var i = 0; i < data.length; i++) {
+                                    $("#browsers").append("<option>" + data[i] + "</option>");
+                                }
+                            }
+
+                        });
+
+                        break;
+
+
+ 
+                    default:
+
+                }
+
+            }
+
+        });
+
+
+
+        $("#btn_GetData").on("click", function () {
+
+            condition = "";
+            $("#Results .header th").remove();
+            filters = [];
+            ColumnsDataTable = [];
+
+
+            $("#searchTable thead tr:eq(0) th input").each(function (index) {
+
+                var property = $("#searchTable thead tr:eq(0) th:eq(" + index + ")").attr("class");
+                var Value = $("#searchTable thead tr:eq(0) th:eq(" + index + ") input").val();
+
+                if (Value != "") {
+                    condition = "where ";
+                    filters.push({
+                        key: property,
+                        value: Value
+                    });
+                }
+
+
+            });
+
+            for (var i = 0; i < filters.length; i++) {
+
+                if (i == filters.length - 1) {
+                    condition += filters[i].key + " = " + "'" + filters[i].value + "'";
+                }
+
+                else {
+
+                    condition += filters[i].key + " = " + "'" + filters[i].value + "'" + " and "
+
+                }
+            }
+
+            $.ajax({
+                url: "/api/SalesMonitorApis/@ViewData["api"]/",
+                data: { 'condition': condition },
+                type: "GET",
+
+                success: function (data) {
+
+                    jsondata = data;
+
+                    if (data.length == null) {
+                        obj = data;
+                        ColumnNames = Object.keys(data);
+                    }
+
+                    else if (Object.keys(data).length === 0) {
+                        return false;
+                    }
+
+                    else {
+
+                        obj = data[0];
+                        ColumnNames = Object.keys(data[0]);
+
+                    }
+                 
+                    for (var i = 0; i < ColumnNames.length; i++) {
+
+                        if (!ColumnNames[i].startsWith("_", 0)) {
+                            ColumnsDataTable.push({ 'name': ColumnNames[i], 'data': ColumnNames[i] });
+                        }
+
+                        else if (ColumnNames[i].startsWith("_", 0)) {
+                            console.log("ok");
+
+                            $("#Results .header").append("<th>" + obj[ColumnNames[i]] + "</th>");
+
+                        }
+
+                    }
+
+                    var results = $("#Results").DataTable({
+
+                        data: jsondata,
+
+                        destroy: true,
+
+                        searching: true,
+
+                        columns: ColumnsDataTable
+
+                    });
+
+
+                }
+
+
+
+            });
+
+        });
+
+    
